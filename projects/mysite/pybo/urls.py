@@ -13,4 +13,10 @@ urlpatterns = [
 
     #질문 등록
     path('question/create/', views.question_create, name='question_create'),
+    
+    #수정 등록
+    path('question/modify/<int:question_id>/', views.question_modify, name='question_modify'),
+
+    #삭제
+    path('question/delete/<int:question_id>/', views.question_delete, name='question_delete'),
 ]
