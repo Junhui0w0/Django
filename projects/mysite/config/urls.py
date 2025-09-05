@@ -22,9 +22,10 @@ from .views import mainpage
 
 #첫 사이트 메인 url
 urlpatterns = [
+    path('', mainpage),
     path('admin/', admin.site.urls),
     # path('pybo/', views.index),
     #path(url경로, 호출할 뷰 함수)
     path('pybo/', include('pybo.urls')), #-> .../pybo/ETC & .../pybo/ETC2 등 pybo로 시작하는 url을 추가할 때 pybo.urls만 수정하면 됨
-    path('', mainpage)
+    path('common/', include('common.urls')), #common앱 추가
 ]
