@@ -1,0 +1,190 @@
+- Project = 큰 틀
+- App = 틀 안에 있는 기능
+
+-migrations: 테이블 생성, 수정을 위해 관리하는 곳 ❗
+-admin: 관리자 화면 구성 -> 장고 관리자 화면 제어 가능 ❗
+-apps: 앱 구성 정보 
+-models: DB 모델 정의 ❗ -> 데이터 타입 확인: https://docs.djangoproject.com/en/5.1/ref/models/fields/#field-types
+-tests: 앱 테스트
+-views: 앱 기능 구현 ❗
+
+- 페이지 추가
+    1. url 매핑 (app폴더/urls.py 와 내가 사용할 url 연결) -> urls.py , views.py 연결
+        -app폴더/url.py
+            path(url주소/ , views.함수명)
+
+        -프로젝트폴더/views.py
+            def 함수명(request, ...): ...
+
+        !단, 앱 전용 url은 include 처리
+        (이해 안되면: https://wikidocs.net/70649)
+
+-migrate ?
+    - DB가 필요한 앱만 필요
+
+-ORM = Object relation mapping
+    DB 테이블을 객체 모델로 추상화
+    별도 쿼리문 필요 X 
+    모델 기반 동작
+
+-테이블 생성
+    config/settings.py -> INSTALLED_APPS에 추가 (ex: pybo.apps.PyboConfig -> 앱이름.apps.앱이름Config ?)
+
+-모델 생성, 수정
+    python manage.py makemigrations -> python manage.py migrate
+
+-모델 테스트?
+    python manage.py shell
+    from ~.models import 모델클래스
+    변수 = 모델클래스(컬럼1=..., 컬럼2=....)
+    변수.save()
+    변수.id -> 아이디 값 = pk (자동증가)
+
+-def __str__(self): return self. subject
+    id 대신 제목 표시 가능
+
+-쿼리
+    1. filter vs get
+        filter(id=1) -> id가 1인 값의 데이터 모두 전달
+        get(id=1) -> id가 1인 값 한건만 리턴 (pk처럼 유일한 값을 조회할 때 주로 사용)
+        참고: https://docs.djangoproject.com/en/5.1/topics/db/queries/
+
+    2. 문자열 포함 여부
+        ~.objects.filter(subject__contains='장고') -> 해당 오브젝트에 '장고' 라는 문자열이 포함되어 있는가?
+
+    3. 변경
+        모델변수.컬럼명 = ~~
+
+    4. 삭제
+        모델변수.delete()
+    
+    5. 두 모델이 연결되어 있을 때 탐색법 ❗
+        모델변수1.모델변수2_set.all()
+            -단, 모델2의 Foreign key가 모델1 이어야 함
+
+    6. 정렬
+        모델명.objects.order_by('-컬럼명') -> 컬럼명의 데이터를 역순 정렬
+        모델명.objects.order_by('컬럼명') -> 컬렴명의 데이터를 정방향으로 정렬
+
+-어드민 계정
+    python manage.py createsuperuser
+
+    -관리자 앱 관리 추가
+        admin.py -> from .models import 모델클래스 -> admin.site.register(모델명)
+
+    일부 어드민 기능 추가 참고: https://docs.djangoproject.com/en/5.1/ref/contrib/admin/
+
+-템플릿 추가(html)
+    settings.py -> TEMPLATES -> 'DIRS':[BASE_DIR/'templates'] (상황에 따라 경로 바꿔도 됨)
+        -모든 앱이 공통으로 사용할 템플릿 -> BASE_DIR/templates
+        -앱1 이 사용할 템플릿 -> BASE_DIR/앱1/templates
+        -앱2 이 사용할 템플릿 -> BASE_DIR/앱2/templates
+
+-템플릿 태그
+    -기본은 html 확장자 파일에서 시작
+        {% ~~~ %} 형식 -> 파이썬 문법을 사용할 때 주로 사용하는듯
+        {{~~}} -> 객체 출력
+
+    -조건문
+        {% if 조건문1 %}
+            <p>조건문1에 해당되는 경우</p>
+        {% elif 조건문2 %}
+            <p>조건문2에 해당되는 경우</p>
+        {% else %}
+            <p>조건문1, 2에 모두 해당되지 않는 경우</p>
+        {% endif %}
+
+    -반복문
+        {% for item in list %}
+            <p>순서: {{ forloop.counter }} </p>
+            <p>{{ item }}</p>
+        {% endfor %}
+
+        -forloop.counter -> 루프 내의 순서로 1부터 표시
+        -forloop.counter0 -> 루프 내의 순서로 0부터 표시
+        -forloop.first -> 첫번째 루프면 True
+        -forloop.last -> 마지막 루프면 True
+
+-서버 응답 코드
+    500: 서버 오류
+    404: 해당 페이지 탐색 불가
+    대부분 그냥 하나의 오류 페이지로 통합해서 보여주지 않나?
+
+-제네릭 뷰
+    일반적으로 views.py에 아래와 같이 작성함
+        def index(...)
+        def detail(...)
+
+    이를 좀 더 간편하게 작성하기 위함 == 제네릭 뷰
+    * views.py
+    class IndexView(generic.ListView):...
+    class DetailView(generic.DetailView):....
+
+    * urls.py
+    path('', views.IndexView.as_view())
+    path('<int:pk>/', views.DetailView.as_view())
+
+    우선 지금은 그냥 넘어가고 추후 연습해보자
+
+- url 하드코딩
+    -개발할 때 url을 변경해야하는 상황이 자주 발생함 -> 매번 url을 변경해주는 것은 유지보수 차원에서 마이너스 요소
+    -> 이를 해결하기 위한 것 == 1:1 매핑
+        *urls.py
+        path(..., name='별칭')
+
+        *html
+        파라미터 1개 전달
+            <li><a href="{% url 'detail' question_id=question.id %}">{{ question.subject }}</a></li>
+
+        파라미터 2개 이상 전달
+            {% url 'detail' question_id=question.id var=2 %} (공백 유의)
+
+        !유의점
+            현재는 pybo라는 단일 앱을 사용 중 이지만, 추후에는 여러 개의 app을 사용 예정
+            이는 충돌 발생 가능성이 있음
+            -> 이를 해결하기 위해 urls.py에 app_name 추가
+            *urls.py 
+                app_name = '앱이름' (네임스페이스)
+                
+            html 파일 수정 필요
+                {% url 'pybo':detail' question_id = question.id %} ...
+
+-보안
+    {% csrf_token %} -> form 태그 바로 아래 위치
+
+-Static = 스타일시트
+    -디렉터리 등록
+        settings.py -> STATICFILES_DIRS = [BASE_DIR / 'static'] 추가
+    -템플릿에 스태틱 적용
+    적용할 html -> 상단에 {% load static %} -> 바로 하단에 <link rel="stylesheet" type="text/css" href="{% static '파일명.css' %}">
+
+-부트스트랩
+    기존 static 적용한 것과 동일
+    다만, <link rel="stylesheet" type="text/css" href="{% static 'bootstrap.min.css' %}"> 로 변경
+    부트스트랩 정보: https://getbootstrap.com/docs/5.3/getting-started/introduction/
+    더 많은 Card 정보: https://getbootstrap.com/docs/5.3/components/card/
+
+-기본 base.html 추가 밎 적용
+    templates 폴더 하위에 bast.html 생성
+    -> 다른 템플릿(html)에 적용
+        1. 최상위에 {%extends 'base.html'%}
+        2. 바로 하단에 {%block content%}
+        3. 최하단에 {%endblock%}
+
+-폼
+    전달되는 파라미터 관리 -> 각 앱에 별도 생성필요
+    1. 필수 파라미터 값이 누락되었는 가 혹은 데이터타입이 다른가를 검증
+    2. HTML 자동 생성
+    3. 모델을 이용한 데이터 저장 기능
+
+    - {{ form.as_p }}
+        form = 특정 폼 객체 -> 해당 폼에서 정의된 속성의 HTML을 자동생성함
+
+    <form method="post" action="...url...">
+        method = post -> 데이터를 서버로 전송하겠다.
+        action = '...url...' -> 해당 url로 데이터를 전송한다 (생략시 현 url로 데이터 전송)
+            action을 생략하는 경우는 해당 폼을 재사용할 경우이다.
+
+    참고: https://docs.djangoproject.com/en/5.1/topics/forms/
+
+    |default_if_none:'' -> 입력값이 잘못될 경우 None이 아닌 빈문자열('') 출력
