@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">
+    <h5 class="my-3 border-bottom pb-2" readonly required>{{ form.subject.value|default_if_none:'' }}</h5><br>
+    <form method="post" autocomplete="off">
+        {% csrf_token %}
+        <input type="hidden" name="category" value="{{ category }}">
+        <!-- 제목 -->
+        <!-- <div class="mb-3">
+            <label for="subject" class="form-label">제목</label>
+            <input type="text" class="form-control" name="subject" id="subject"
+                   value="{{ form.subject.value|default_if_none:'' }}" required>
+        </div> -->
+
+        <!-- 보내는 분 정보 -->
+        <div class="mb-3">
+            <label for="send_name" class="form-label">보내는 분 성함</label>
+            <input type="text" class="form-control" name="send_name" id="send_name"
+                   value="" required>
+        </div>
+        <div class="mb-3">
+            <label for="send_phone" class="form-label">보내는 분 연락처 (- 포함하여 입력해주세요 | ex: 010-xxxx-yyyy)</label>
+            <input type="text" class="form-control" name="send_phone" id="send_phone"
+                   value="{{ form.send_phone.value|default_if_none:'' }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="send_addr" class="form-label">보내는 분 주소</label>
+            <div class="input-group">
+                <input type="text" class="form-control" name="send_addr" id="send_addr"
+                       value="{{ form.send_addr.value|default_if_none:'' }}" placeholder="주소를 입력하세요" required readonly>
+                <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode('send_addr')">주소 검색</button>
+            </div>
+        </div>
+
+        <!-- 구분선 -->
+        <br>
+        <hr class="my-4">
+        <br>
+
+        <!-- 상품 정보 -->
+        <div class="mb-3">
+            <label for="product_type" class="form-label">상품 종류</label>
+            <input type="text" class="form-control" name="product_type" id="product_type"
+                   value="{{ form.product_type.value|default_if_none:'' }}" required>
+        </div>
+
+        <!-- 포장 형식 -->
+        <div class="mb-3">
+            <label for="id_package_type" class="form-label">포장 형식</label>
+            <select class="form-select mb-2" id="id_package_type" name="package_type" onchange="toggleCustomPackageInput(this)">
+                <option value="">-- 선택하세요 --</option>
+                <option value="naked" {% if form.package_type.value == "naked" %}selected{% endif %}>나체</option>
+                <option value="box" {% if form.package_type.value == "box" %}selected{% endif %}>박스</option>
+                <option value="vinyl" {% if form.package_type.value == "vinyl" %}selected{% endif %}>비닐</option>
+                <option value="madae" {% if form.package_type.value == "madae" %}selected{% endif %}>마대</option>
+                <option value="custom" {% if form.package_type.value not in "naked box vinyl madae" and form.package_type.value %}selected{% endif %}>직접 입력</option>
+            </select>
+            <input type="text" class="form-control mt-2"
+                   id="custom_package_type"
+                   name="custom_package_type"
+                   placeholder="직접 입력"
+                   style="display: none;"
+                   value="{% if form.package_type.value not in 'naked box vinyl madae' and form.package_type.value %}{{ form.package_type.value }}{% endif %}">
+        </div>
+
+        <!-- 수량 -->
+        <div class="mb-3">
+            <label for="id_num" class="form-label">수량</label>
+            <select class="form-select mb-2" id="id_num" name="num" onchange="toggleCustomNumInput(this)">
+                <option value="">-- 선택하세요 --</option>
+                <option value="1" {% if form.num.value == "1" %}selected{% endif %}>1</option>
+                <option value="2" {% if form.num.value == "2" %}selected{% endif %}>2</option>
+                <option value="3" {% if form.num.value == "3" %}selected{% endif %}>3</option>
+                <option value="4" {% if form.num.value == "4" %}selected{% endif %}>4</option>
+                <option value="5" {% if form.num.value == "5" %}selected{% endif %}>5</option>
+                <option value="custom" {% if form.num.value not in "1 2 3 4 5" and form.num.value %}selected{% endif %}>직접 입력</option>
+            </select>
+            <input type="text" min="1" class="form-control mt-2"
+                   id="custom_num"
+                   name="custom_num"
+                   placeholder="직접 입력"
+                   style="display: none;"
+                   value="{% if form.num.value not in '1 2 3 4 5' and form.num.value %}{{ form.num.value }}{% endif %}">
+        </div>
+
+        <button type="submit" class="btn btn-primary">등록하기</button>
+        <br><br><br><br><br>
+    </form>
+</div>
+
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+// 포장 형식 직접 입력
+function toggleCustomPackageInput(select) {
+    const customInput = document.getElementById('custom_package_type');
+    if (select.value === 'custom') {
+        customInput.style.display = 'block';
+        customInput.removeAttribute('readonly');
+    } else {
+        customInput.style.display = 'none';
+        customInput.setAttribute('readonly', true);
+        customInput.value = '';
+    }
+}
+// 수량 직접 입력
+function toggleCustomNumInput(select) {
+    const customInput = document.getElementById('custom_num');
+    if (select.value === 'custom') {
+        customInput.style.display = 'block';
+        customInput.removeAttribute('readonly');
+    } else {
+        customInput.style.display = 'none';
+        customInput.setAttribute('readonly', true);
+        customInput.value = '';
+    }
+}
+// 페이지 로드 시 직접입력 선택 상태 반영
+window.addEventListener('DOMContentLoaded', function() {
+    toggleCustomPackageInput(document.getElementById('id_package_type'));
+    toggleCustomNumInput(document.getElementById('id_num'));
+});
+
+// 주소 자동완성(카카오/다음 API 연동용 예시 함수)
+function execDaumPostcode(targetId) {
+    // 실제 API 연동 코드를 여기에 작성하세요.
+    alert('주소 검색 API를 연동하세요. (예: 카카오 주소 API)');
+}
+</script>
+{% endblock %}
