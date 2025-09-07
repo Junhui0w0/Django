@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 # from django.http import HttpResponseNotAllowed
 from django.utils import timezone
-from ..models import Question, Answer
+from ..models import Question, Answer, Pre_Question, Find_Question
 from ..forms import QuestionForm, AnswerForm
 
 from django.core.paginator import Paginator #- 한 페이지에 여러 개의 결과를 보여주는 것 방지
@@ -9,6 +9,34 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from django.db.models import Q
+
+def mainpage(request):
+    return render(request, 'common/mainpage.html')
+
+def board(request, category):
+    page = request.GET.get('page', '1')
+    kw = request.GET.get('kw', '')
+
+    if category == 'pre':
+        question_list = Pre_Question.objects.order_by('-create_date')
+    elif category == 'find':
+        question_list = Find_Question.objects.order_by('-create_date')
+    else:
+        question_list = Question.objects.filter(category=category).order_by('-create_date')
+
+    if kw:
+        question_list = question_list.filter(
+            Q(subject__icontains=kw) |
+            # Q(content__icontains=kw) |
+            Q(answer__content__icontains=kw) |
+            Q(author__username__icontains=kw) |
+            Q(answer__author__username__icontains=kw)
+            # Q(create_date__date=kw)
+        ).distinct()
+    paginator = Paginator(question_list, 10)
+    page_obj = paginator.get_page(page)
+    context = {'question_list': page_obj, 'category': category, 'page': page, 'kw': kw}
+    return render(request, 'pybo/question_list.html', context)
 
 def index(request): #게시글 리스트 -> 한 페이지당 최대 10개의 게시글 출력하도록 할 것
     # question_lst  = Question.objects.order_by('-create_date') # -create_date = 역방향 / create_date=정방향
@@ -36,9 +64,16 @@ def index(request): #게시글 리스트 -> 한 페이지당 최대 10개의 게
     return render(request, 'pybo/question_list.html', context)
 
 
-def detail(request, question_id): #게시글 상세
-    # question = Question.objects.get(id=question_id)
-    question = get_object_or_404(Question, pk=question_id) #pk=primary key -> 데이터가 없어서 505 에러가 발생해도 404 출력
-    context={'question':question}
-
-    return render(request, 'pybo/question_detail.html', context)
+def detail(request, category, question_id): #게시글 상세
+    if category == 'pre':
+        question = get_object_or_404(Pre_Question, pk=question_id)
+        template = 'pybo/pre_question_detail.html'
+    elif category == 'find':
+        question = get_object_or_404(Find_Question, pk=question_id)
+        template = 'pybo/find_question_detail.html'
+    else:
+        question = get_object_or_404(Question, pk=question_id)
+        template = 'pybo/question_detail.html'
+        
+    context = {'question': question, 'category': category}
+    return render(request, template, context)
