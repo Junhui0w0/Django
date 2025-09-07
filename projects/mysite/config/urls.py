@@ -16,13 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include #- 앱 전용 url은 include로 처리
-from .views import mainpage
+from pybo.views import base_views
 
 # from pybo import views
+# app_name='config'#<- 네임스페이스 설정
 
 #첫 사이트 메인 url
 urlpatterns = [
-    path('', mainpage),
+    path('', base_views.mainpage, name='mainpage'), #-> 첫 화면을 pybo의 index로 지정
     path('admin/', admin.site.urls),
     # path('pybo/', views.index),
     #path(url경로, 호출할 뷰 함수)
