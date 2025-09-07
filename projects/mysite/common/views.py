@@ -5,7 +5,7 @@ from common.forms import UserForm
 
 def logout_view(request):
     logout(request)
-    return redirect('pybo:index')
+    return redirect('mainpage')
 
 def signup(request):
     if request.method == "POST": #데이터를 전송한다. = 회원가입 폼을 채워서 서버에 전송한다
@@ -17,7 +17,7 @@ def signup(request):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user) #회원가입 후 자동 로그인
-            return redirect('pybo:index')
+            return redirect('mainpage')
         
     else:
         form = UserForm()
