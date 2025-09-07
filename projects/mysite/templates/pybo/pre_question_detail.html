@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-3">
+    <h2 class="border-bottom py-2">{{ question.subject }}</h2>
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text">
+                <p><strong>보내는 분:</strong> {{ question.send_name }} </p>
+                <p><strong>보내는 분 TEL:</strong> {{ question.send_phone }} </p>
+                <p><strong>보내는 주소:</strong> {{ question.send_addr }}</p>
+                <hr>
+                <p><strong>받는 분:</strong> {{ question.rec_name }}</p>
+                <p><strong>받는 분 TEL:</strong> {{ question.rec_phone }}</p>
+                <p><strong>받는 주소:</strong> {{ question.rec_addr }}</p>
+                <hr>
+                <p><strong>상품 종류:</strong> {{ question.product_type }}</p>
+                
+                {% if question.package_type == 'madae' %}
+                <p><strong>포장 형식:</strong> 마대</p>
+                {% elif question.package_type == 'box' %}
+                <p><strong>포장 형식:</strong> 박스</p>
+                {% elif question.package_type == 'vinyl' %}
+                <p><strong>포장 형식:</strong> 비닐</p>
+                {% elif question.package_type == 'naked' %}
+                <p><strong>포장 형식:</strong> 나체</p>
+                {% else %}
+                <p><strong>포장 형식:</strong> 기타(직접입력) - {{ question.package_type }}</p>
+                {% endif %}
+
+                {% if question.num == '1' %}
+                <p><strong>수량:</strong> 1</p>
+                {% elif question.num == '2' %}
+                <p><strong>수량:</strong> 2</p>
+                {% elif question.num == '3' %}
+                <p><strong>수량:</strong> 3</p>
+                {% elif question.num == '4' %}
+                <p><strong>수량:</strong> 4</p>
+                {% elif question.num == '5' %}
+                <p><strong>수량:</strong> 5</p>
+                {% else %}
+                <p><strong>수량:</strong> {{ question.num }}</p>
+                {% endif %}
+
+            </div>
+            <div class="d-flex justify-content-end">
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div>작성자: {{ question.author.username }}</div>
+                    <div>작성일시: {{ question.create_date }}</div>
+                    {% if question.modify_date %}
+                    <div>수정일시: {{ question.modify_date }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="my-3">
+
+        {% if request.user == question.author or request.user.is_superuser %}
+        <a href="javascript:void(0)" class="delete btn btn-sm btn-outline-secondary"
+        data-uri="{% url 'pybo:category_question_delete' category question.id %}">삭제</a>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+{% block script %}
+<script type='text/javascript'>
+const delete_elements = document.getElementsByClassName("delete");
+Array.from(delete_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        if(confirm("정말로 삭제하시겠습니까?")) {
+            location.href = this.dataset.uri;
+        };
+    });
+});
+
+</script>
+{% endblock %}
