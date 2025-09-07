@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center" style="height: 80vh;">
+    <div class="d-flex flex-column align-items-center">
+        <div class="row" style="width: 400px; height: 400px;">
+            <div class="col-7 p-2">
+                <a href="{% url 'pybo:board' 'pre' %}" class="btn btn-outline-primary w-100 h-100 fs-4" style="height: 190px;">
+                    택배 사전 접수
+                </a>
+            </div>
+            <div class="col-7 p-2">
+                <a href="{% url 'pybo:board' 'find' %}" class="btn btn-outline-success w-100 h-100 fs-4" style="height: 190px;">
+                    택배 찾기
+                </a>
+            </div>
+            <div class="col-7 p-2">
+                <a href="{% url 'pybo:board' 'notice' %}" class="btn btn-outline-info w-100 h-100 fs-4" style="height: 190px;">
+                    공지사항
+                </a>
+            </div>
+            <div class="col-7 p-2">
+                <a href="{% url 'pybo:board' 'qna' %}" class="btn btn-outline-warning w-100 h-100 fs-4" style="height: 190px;">
+                    QnA
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
