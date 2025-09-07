@@ -188,3 +188,195 @@
     참고: https://docs.djangoproject.com/en/5.1/topics/forms/
 
     |default_if_none:'' -> 입력값이 잘못될 경우 None이 아닌 빈문자열('') 출력
+
+- 네비게이션 바
+    <!-- 네비게이션바 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'pybo:index' %}">Pybo</a>
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">로그인</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+-페이징
+    -한 페이지에 여러개의 게시글이 출력되는 것을 방지
+    -장고의 'Paginator' 를 활용해 해결 가능
+
+    -page.obj 함수
+        paginator.count	전체 게시물 개수
+        paginator.per_page	페이지당 보여줄 게시물 개수
+        paginator.page_range	페이지 범위
+        number	현재 페이지 번호
+        previous_page_number	이전 페이지 번호
+        next_page_number	다음 페이지 번호
+        has_previous	이전 페이지 유무
+        has_next	다음 페이지 유무
+        start_index	현재 페이지 시작 인덱스(1부터 시작)
+        end_index	현재 페이지의 끝 인덱스(1부터 시작)
+
+    -페이징 기능
+        이전 페이지가 있는지 체크	{% if question_list.has_previous %}
+        이전 페이지 번호	        {{ question_list.previous_page_number }}
+        다음 페이지가 있는지 체크	{% if question_list.has_next %}
+        다음 페이지 번호	        {{ question_list.next_page_number }}
+        페이지 리스트 루프	        {% for page_number in question_list.paginator.page_range %}
+        현재 페이지와 같은지 체크	{% if page_number == question_list.number %}
+
+    -참고
+        https://getbootstrap.com/docs/5.1/components/pagination/
+
+-템플릿 필터
+    -템플릿 태그에서 '|' 기호를 사용하는 필터 (... | default_if_none:'')
+    -단, |add: 필터는 인수에 적용 가능 / 변수에 적용 불가능
+    -> 이를 해결하기 위해 사용자 정의 필터를 만들 수 있다. (templatetags/pybo_filter.py)
+    -> 이후 html 상단(extends 하단)에 {% load pybo_filter %} 추가
+    -> 단, 반드시 templatetags에 __init__.py 추가 (파일 안에는 아무것도 없어도 됨)
+
+-앱 설치 단계
+    1. 기본 프로젝트 폴더로 이동 -> cd
+    2. django-admin startapp 앱이름
+    3. 메인/settings.py -> INSTALLED_APPS -> '앱이름.apps.앱이름Config' 추가
+                                    ex: common.apps.CommonConfig
+    4. 메인/urls.py -> path('앱이름/', include('앱이름.urls'))
+    5. 앱이름/urls.py 
+        app_name = '앱이름'
+        urlpatterns=[...]
+
+-로그인
+    - 기본적으로 django.contrib.auth 패키지를 통해 간단하게 구현 가능
+        ㄴ path('login/', auth_views.LoginView.as_view(), name='login)
+        ㄴ 단, 위에 경우 templates 경로가 자동으로 registeration/login.html을 참조하니 이를 해결해야 함.
+        ㄴ as_view(template_name='앱이름/login.html') 을 통해 해결 가능
+    -위 패키지로 로그인이 성공한 경우 장고에서는 자동으로 /accounts/profile로 리다이렉트 함.
+        ㄴ 해결법: settings.py -> LOGIN_REDIRECT_URL = 'url' 추가 
+
+-로그아웃
+    - 로그인 하는 html 파일 수정 필요
+        user.is_authenticated - 현재 사용자가 인증되었는지 여부 (로그인한 상태라면 true, 로그아웃 상태라면 false)
+        user.username - 사용자명 (사용자 ID)
+        user.is_superuser - 사용자가 슈퍼유저인지 여부
+
+-회원가입
+    -패키지
+        from django.contrib.auth.models import User
+        from django.contrib.auth.forms import UserCreationForm
+            ㄴ username	사용자이름
+            ㄴ password1	비밀번호1
+            ㄴ password2	비밀번호2 (비밀번호1을 제대로 입력했는지 대조하기 위한 값)
+            ㄴ is_valid() 함수를 통해 위 3개의 값이 정확하게 기입되었는지 확인 가능
+
+    -데이터
+        from django.contrib.auth import authenticate, login, logout
+
+        username = form.cleaned_data.get('username')
+        raw_password = form.cleaned_data.get('password1')
+
+-로그인이 필요한 경우
+    from django.contrib.auth.decorators import login_required
+
+    함수 위에 어노테이션 추가
+    @login_required(login_url='common:login')
+    ㄴ 해당 함수를 실행시키기 위해선 login 필요함
+
+-url의 next 파라미터 사용
+    html 내에 아래 코드 추가
+        <input type="hidden" name="next" value="{{ next }}">  <!-- 로그인 성공후 이동되는 URL -->
+
+-redirect('pybo:detail', question_id=question.id) [vs] render(request, 'pybo/question_form.html', context)
+    1. redirect(a, b, ..)
+        a -> 리다이렉트 시켜서 보여줄 페이지 -> 보통 urls.py에 있는 name 값을 사용함
+        b -> 만약 a로 리다이렉트를 시키는데 파라미터가 필요한 경우 입력
+
+    2. render(request, '앱이름/...html', {'전달파라미터이름':전달값}) -> 현재 화면을 변경시켜주는 것 뿐
+        현재 화면은 메인 페이지가 될 수도 있고, 로그인 페이지가 될 수도 있음
+        특정 작업(submit 버튼을 누른다는지 등)을 통해 html에 입력할 수 있는 정보를 입력 후 서버에 전달
+
+        전달파라미터이름 -> html에서 사용될 이름
+        전달값 -> 현재 페이지에서 사용되는 변수명
+
+-수정하기
+    var = 모델폼(instace=변수명) -> 기존에 저장된 정보를 불러올 수 있음
+
+-삭제하기
+    a href=javascript:void(0)
+        ㄴ 삭제하기와 같은 기능은 사용자에게 다시 한 번 더 확인하는 절차가 필요함
+        ㄴ 이를 해결하기 위해 JS 사용
+
+    -JS 코드 -> html에 추가
+        {% block script %}
+        <script type='text/javascript'>
+        const delete_elements = document.getElementsByClassName("delete");
+        Array.from(delete_elements).forEach(function(element) {
+            element.addEventListener('click', function() {
+                if(confirm("정말로 삭제하시겠습니까?")) {
+                    location.href = this.dataset.uri;
+                };
+            });
+        });
+        </script>
+        {% endblock %}
+
+-자바 스크립트 추가
+    - 토대가 되는 html(bast.html) </body> 태그 위에 아래 코드 추가
+        {% block script %}
+            !JS코드가 들어갈 곳!
+        {% endblock %}
+
+-view 정리
+    1. 앱폴더/views 폴더 생성
+        ㄴ 해당 폴더에 각 기능별.py 파일 생성 후 함수 생성
+        ㄴ 이후 views폴더에 __init__.py 파일 생성 -> from .폴더명 import * 주르르륵
+        ㄴ <1번> 방법은 여러명이서 진행하는 프로젝트일 경우 비추 (url에 연결된 함수가 어느 파일에 있는지 모름)
+
+    2. 전체 경로 입력
+        ㄴ 1번 방법의 단점을 해결하는법: 전체 경로 작성
+        
+-앵커 -> 페이지 내 위치 이동
+    1. 앵커로 돌아올 곳에 코드 추가: <a id="answer_{{ answer.id }}"></a>
+    2. views.py -> from django.shortcuts import resolve_url
+    3. return redirect ('{}#answer_{}'.format(
+                resolve_url('pybo:detail', question_id=question.id), answer.id))
+
+-마크다운
+    **string** -> 강조(볼드체)
+    [출력할 이름](url주소) -> '출력할 이름' 형태의 string (클릭하면 url주소로 이동)
+
+    참고: https://www.markdownguide.org/getting-started
+
+    - filter.py
+        import markdown
+        from django.utils.safestring import mark_safe
+        ...
+        @register.filter
+        def mark(value):
+            extensions = ["nl2br", "fenced_code"]
+            return mark_safe(markdown.markdown(value, extensions=extensions))
+
+-파라미터 조합 페이지 조회
+    1. 여러 파라미터를 조합하여 페이지를 조회할 땐 GET을 사용해서 구현하는 것을 권장
+
+-자바 스크립트 값 읽어오기
+    id='abc' 로 작성
+
+-검색
+    1. 문자열
+        views.py -> from django.db.models import Q -> kw = request.GET('kw', '')
+        if kw:
+            Q(컬럼__icontains=kw)
+        context = {...'kw':kw...}
+    2. 데이트타임
+        Q(컬럼__date=kw)
