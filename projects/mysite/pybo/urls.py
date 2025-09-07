@@ -8,27 +8,39 @@ urlpatterns = [
     path('', base_views.index, name='index'), #-> pybo 이하에 urls.py이므로 이미 기본 url은 .../pybo/ 이다.
 
     #질문 상세 페이지 (상세, 댓글)
-    path('<int:question_id>/', base_views.detail, name='detail'), #-> int:question_id -> question_id가 detail의 파라미터로 전달됨
-    path('answer/create/<int:question_id>/', answer_views.answer_create, name='answer_create'), #답변등록
+    path('board/<str:category>/<int:question_id>/', base_views.detail, name='detail'),
 
-    #질문 등록
-    path('question/create/', question_views.question_create, name='question_create'),
-    
-    #수정 등록
-    path('question/modify/<int:question_id>/', question_views.question_modify, name='question_modify'),
+    #===============================================
 
-    #삭제
-    path('question/delete/<int:question_id>/', question_views.question_delete, name='question_delete'),
+    #메인페이지 - 카테고리별 게시판
+    path('board/<str:category>/', base_views.board, name='board'),
 
-    #답변 수정
-    path('answer/modify/<int:answer_id>/', answer_views.answer_modify, name='answer_modify'),
+    #카테고리별 질문 작성
+    path('board/<str:category>/create/', question_views.category_question_create, name='category_question_create'),
 
-    #답변 삭제
-    path('answer/delete/<int:answer_id>/', answer_views.answer_delete, name='answer_delete'),
+    #카테고리별 질문 삭제
+    path('board/<str:category>/delete/<int:question_id>/', question_views.category_question_delete, name='category_question_delete'),
 
-    #추천 - 게시글
-    path('question/vote/<int:question_id>/', question_views.question_vote, name='question_vote'),
+    #카테고리별 질문 수정
+    path('board/<str:category>/modify/<int:question_id>/', question_views.category_question_modify, name='category_question_modify'),
 
-    #추천 - 댓글
-    path('answer/vote/<int:answer_id>/', answer_views.answer_vote, name='answer_vote'),
+
+    #===============================================
+
+    #카테고리별 답변 등록
+    path('answer/create/<int:question_id>/<str:category>/', answer_views.category_answer_create, name='category_answer_create'), #답변등록
+
+    #카테고리별 답변 수정
+    path('answer/modify/<int:answer_id>/', answer_views.category_answer_modify, name='category_answer_modify'),
+
+    #카테고리별 답변 삭제
+    path('answer/delete/<int:answer_id>/', answer_views.category_answer_delete, name='category_answer_delete'),
+
+    #===============================================
+
+    #카테고리별 게시글 추천
+    path('question/vote/<int:question_id>/<str:category>/', question_views.category_question_vote, name='category_question_vote'),
+
+    #카테고리별 댓글 추천
+    path('answer/vote/<int:answer_id>/', answer_views.category_answer_vote, name='category_answer_vote'),
 ]
