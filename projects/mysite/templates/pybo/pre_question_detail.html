@@ -61,6 +61,12 @@
         data-uri="{% url 'pybo:category_question_delete' category question.id %}">삭제</a>
         {% endif %}
 
+        <!-- 처리완료 -->
+        {% if request.user.is_superuser %}
+        <a href="javascript:void(0)" class="processed btn btn-sm btn-outline-secondary"
+        data-uri="{% url 'pybo:category_question_processed' category question.id %}">처리완료</a>
+        {% endif %}
+
     </div>
 </div>
 {% endblock %}
@@ -70,6 +76,15 @@ const delete_elements = document.getElementsByClassName("delete");
 Array.from(delete_elements).forEach(function(element) {
     element.addEventListener('click', function() {
         if(confirm("정말로 삭제하시겠습니까?")) {
+            location.href = this.dataset.uri;
+        };
+    });
+});
+
+const processed_elements = document.getElementsByClassName("processed");
+Array.from(processed_elements).forEach(function(element) {
+    element.addEventListener('click', function() {
+        if(confirm("처리완료 진행하시겠습니까?")) {
             location.href = this.dataset.uri;
         };
     });
