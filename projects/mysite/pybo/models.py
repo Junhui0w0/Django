@@ -12,6 +12,8 @@ class Pre_Question(models.Model): #택배 사전 접수
     ]
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='pre')
 
+    processed = models.BooleanField(default=False)
+
     subject = models.CharField(max_length=500, blank=True)
     send_name = models.CharField(max_length=50) #보내는 분 성함
     send_phone = models.CharField(max_length=20) #보내는 분 연락처
@@ -36,6 +38,8 @@ class Pre_Question(models.Model): #택배 사전 접수
         return self.subject
 
 class Find_Question(models.Model):
+    processed = models.BooleanField(default=False)
+
     subject = models.CharField(max_length=200, blank=True)
     send_name = models.CharField(max_length=50) #보내는 분 성함
     send_phone = models.CharField(max_length=20) #보내는 분 연락처
@@ -55,6 +59,8 @@ class Find_Question(models.Model):
         return self.subject
 
 class Question(models.Model): #공지 / 질문
+    processed = models.BooleanField(default=False)
+    
     CATEGORY_CHOICES = [
         ('qna', '문의하기'),
         ('notice', '공지사항'),
