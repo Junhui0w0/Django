@@ -24,6 +24,9 @@ urlpatterns = [
     #카테고리별 질문 수정
     path('board/<str:category>/modify/<int:question_id>/', question_views.category_question_modify, name='category_question_modify'),
 
+    #카테고리별 게시글 처리완료
+    path('board/<str:category>/processed/<int:question_id>/', question_views.category_question_processed, name='category_question_processed'),
+
 
     #===============================================
 
