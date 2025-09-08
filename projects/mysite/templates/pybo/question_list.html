@@ -48,11 +48,27 @@
         {% if question_list %}
         {% for question in question_list %}
         <tr class="text-center">
+
+            {% if question.category == 'notice' %}
             <td>
+            {% elif question.processed == False %}
+            <td style="background-color:#FFC6C1;">
+            {% else %}
+            <td style="background-color:#AFFFC8;">
+            {% endif %}
+            
                 <!-- 번호 = 전체건수 - 시작인덱스 - 현재인덱스 + 1 -->
                 {{ question_list.paginator.count|sub:question_list.start_index|sub:forloop.counter0|add:1 }}
             </td>
+
+            {% if question.category == 'notice' %}
             <td class="text-start">
+            {% elif question.processed == False %}
+            <td class="text-start" style="background-color:#FFC6C1;">
+            {% else %}
+            <td class="text-start" style="background-color:#AFFFC8;">
+            {% endif %}
+
                 {% if category == 'pre' %}
                     <a href="{% url 'pybo:detail' 'pre' question.id %}">{{ question.subject }}</a>
                 {% elif category == 'find' %}
@@ -64,8 +80,22 @@
                     {% endif %}
                 {% endif %}
             </td>
-            <td>{{ question.author.username }}</td>  <!-- 글쓴이 추가 -->
+
+            {% if question.category == 'notice' %}
+            <td>{{ question.author.username }}</td>
+            {% elif question.processed == False %}
+            <td style="background-color:#FFC6C1;">{{ question.author.username }}</td>  <!-- 글쓴이 추가 -->
+            {% else %}
+            <td style="background-color:#AFFFC8;">{{ question.author.username }}</td>
+            {% endif %}
+
+            {% if question.category == 'notice' %}
             <td>{{ question.create_date }}</td>
+            {% elif question.processed == False %}
+            <td style="background-color:#FFC6C1;">{{ question.create_date }}</td>
+            {% else %}
+            <td style="background-color:#AFFFC8;">{{ question.create_date }}</td>
+            {% endif %}
         </tr>
         {% endfor %}
         {% else %}
