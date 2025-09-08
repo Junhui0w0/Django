@@ -111,7 +111,7 @@ def category_question_create(request, category): #질문등록
 
             if form.is_valid(): #유효성 검사
                 question = form.save(commit=False) #commit=False -> 임시저장
-                question.subject = f'{category_name} | {today} | {username}'
+                # question.subject = f'{category_name} | {today} | {username}'
                 question.create_date = timezone.now()
                 question.category = category
                 question.author = request.user
@@ -120,9 +120,9 @@ def category_question_create(request, category): #질문등록
             
             
         else:
-            initial_subject = f'{category_name} | {today} | {username}'
+            # initial_subject = f'{category_name} | {today} | {username}'
 
-            form = QuestionForm(initial={'subject': initial_subject})
+            form = QuestionForm()
 
         context = {'form': form, 'category': category}
         return render(request, 'pybo/question_form.html', context)
@@ -152,7 +152,24 @@ def category_question_delete(request, category, question_id):
     return redirect('pybo:detail', context)
 
 
+@login_required(login_url='common:login')
+def category_question_processed(request, category, question_id):
+    if category == 'pre':
+        question = get_object_or_404(Pre_Question, pk=question_id)
 
+    elif category == 'find':
+        question = get_object_or_404(Find_Question, pk=question_id)
+
+    elif category in ('qna', 'notice'):
+        question = get_object_or_404(Question, pk=question_id)
+
+    if request.user.is_superuser:
+        question.processed = True #처리완료
+        print(question.processed)
+        question.save()
+
+    print(f'현재 제목: {question.subject}')
+    return redirect('pybo:board', category=category)
 
 #카테고리별 글 수정
 @login_required(login_url='common:login') #흠.. 애초에 로그인 한 사람 정보를 기반으로 보이게 할 텐데 필요한가?
