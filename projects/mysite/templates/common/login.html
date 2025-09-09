@@ -1,21 +1,52 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container my-3">
-    <form method="post" action="{% url 'common:login' %}">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ next }}">  <!-- 로그인 성공후 이동되는 URL -->
-        {% include "form_errors.html" %}
-        <div class="mb-3">
-            <label for="username">회사명@이름 (ex: 대신택배@홍길동)</label>
-            <input type="text" class="form-control" name="username" id="username"
-                   value="{{ form.username.value|default_if_none:'' }}">
-        </div>
-        <div class="mb-3">
-            <label for="password">전화번호 (ex: 010-1111-2222)</label>
-            <input type="password" class="form-control" name="password" id="password"
-                   value="{{ form.password.value|default_if_none:'' }}">
-        </div>
-        <button type="submit" class="btn btn-primary">로그인</button>
-    </form>
+    <div class="d-flex justify-content-center">
+        <form method="post" action="{% url 'common:login' %}" style="width: 60%;">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">  <!-- 로그인 성공후 이동되는 URL -->
+            {% include "form_errors.html" %}
+            <div class="mb-3">
+                <label for="username">회사명@이름 (ex: 대신택배@홍길동)</label>
+                <input type="text" class="form-control" name="username" id="username"
+                    value="{{ form.username.value|default_if_none:'' }}">
+            </div>
+            <div class="mb-3">
+                <label for="password">전화번호 (ex: 010-1111-2222)</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" name="password" id="password"
+                        value="{{ form.password.value|default_if_none:'' }}">
+                    <span class="input-group-text toggle-password" data-target="password">
+                        <i class="bi bi-eye-slash"></i>
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">로그인</button>
+        </form>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const togglePasswordSpans = document.querySelectorAll('.toggle-password');
+        togglePasswordSpans.forEach(span => {
+            span.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+
+                // input type을 password <-> text로 전환
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
