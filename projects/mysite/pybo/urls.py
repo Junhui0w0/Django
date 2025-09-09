@@ -5,7 +5,6 @@ app_name = 'pybo' #네임스페이스 설정
 
 urlpatterns = [
     #메인 pybo 페이지
-    path('', base_views.index, name='index'), #-> pybo 이하에 urls.py이므로 이미 기본 url은 .../pybo/ 이다.
 
     #질문 상세 페이지 (상세, 댓글)
     path('board/<str:category>/<int:question_id>/', base_views.detail, name='detail'),
