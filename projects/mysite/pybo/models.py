@@ -18,16 +18,21 @@ class Pre_Question(models.Model): #택배 사전 접수
     send_name = models.CharField(max_length=50) #보내는 분 성함
     send_phone = models.CharField(max_length=20) #보내는 분 연락처
 
-    send_addr = models.CharField(max_length=200, blank=True, null=True) #보내는 분 주소
+    send_addr_zipcode = models.CharField(max_length=200, blank=True, null=True) #보내는 분 - 우편번호
+    send_addr_road = models.CharField(max_length=200, blank=True, null=True) #보내는 분 - 도로명 주소
+    send_addr_detail = models.CharField(max_length=200, blank=True, null=True) #보내는 분 - 상세 주소
 
     rec_name = models.CharField(max_length=50) #받는 분 성함
     rec_phone = models.CharField(max_length=20) #받는 분 연락처
 
-    rec_addr = models.CharField(max_length=200, blank=True, null=True) #받는 분 주소
+    rec_addr_zipcode = models.CharField(max_length=200, blank=True, null=True) #받는 분 - 우편번호
+    rec_addr_road = models.CharField(max_length=200, blank=True, null=True) #받는 분 - 도로명 주소
+    rec_addr_detail = models.CharField(max_length=200, blank=True, null=True) #받는 분 - 상세 주소
 
     product_type = models.CharField(max_length=100) #상품 종류
     package_type = models.CharField(max_length=20) #포장 형식
     num = models.CharField(max_length=10) #수량
+    pay_method = models.CharField(max_length=50) #지불방식 -> at_now = 선불 // at_delivered = 후불
 
     create_date = models.DateTimeField()
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='author_pre_question') #User가 삭제되면 질문도 삭제
@@ -44,7 +49,9 @@ class Find_Question(models.Model):
     send_name = models.CharField(max_length=50) #보내는 분 성함
     send_phone = models.CharField(max_length=20) #보내는 분 연락처
 
-    send_addr = models.CharField(max_length=200, blank=True, null=True) #보내는 분 주소
+    send_addr_zipcode = models.CharField(max_length=200, blank=True, null=True) #보내는 분 - 우편번호
+    send_addr_road = models.CharField(max_length=200, blank=True, null=True) #보내는 분 - 도로명 주소
+    send_addr_detail = models.CharField(max_length=200, blank=True, null=True) #보내는 분 - 상세 주소
 
     product_type = models.CharField(max_length=100) #상품 종류
     package_type = models.CharField(max_length=20) #포장 형식
