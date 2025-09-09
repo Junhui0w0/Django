@@ -7,11 +7,15 @@
             <div class="card-text">
                 <p><strong>보내는 분:</strong> {{ question.send_name }} </p>
                 <p><strong>보내는 분 TEL:</strong> {{ question.send_phone }} </p>
-                <p><strong>보내는 주소:</strong> {{ question.send_addr }}</p>
+                <p><strong>보내는 분 - 우편번호:</strong> {{ question.send_addr_zipcode }}</p>
+                <p><strong>보내는 분 - 도로명 주소:</strong> {{ question.send_addr_road }}</p>
+                <p><strong>보내는 분 - 상세 주소:</strong> {{ question.send_addr_detail }}</p>
                 <hr>
                 <p><strong>받는 분:</strong> {{ question.rec_name }}</p>
                 <p><strong>받는 분 TEL:</strong> {{ question.rec_phone }}</p>
-                <p><strong>받는 주소:</strong> {{ question.rec_addr }}</p>
+                <p><strong>받는 분 - 우편번호:</strong> {{ question.rec_addr_zipcode }}</p>
+                <p><strong>받는 분 - 도로명 주소:</strong> {{ question.rec_addr_road }}</p>
+                <p><strong>받는 분 - 상세 주소:</strong> {{ question.rec_addr_detail }}</p>
                 <hr>
                 <p><strong>상품 종류:</strong> {{ question.product_type }}</p>
                 
@@ -39,6 +43,12 @@
                 <p><strong>수량:</strong> 5</p>
                 {% else %}
                 <p><strong>수량:</strong> {{ question.num }}</p>
+                {% endif %}
+
+                {% if question.pay_method == 'at_now' %}
+                <p><strong>지불방식:</strong> 현불</p>
+                {% elif question.pay_method == 'at_delivered' %}
+                <p><strong>지불방식:</strong> 착불</p>
                 {% endif %}
 
             </div>

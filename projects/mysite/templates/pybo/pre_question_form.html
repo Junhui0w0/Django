@@ -15,22 +15,31 @@
 
         <!-- 보내는 분 정보 -->
         <div class="mb-3">
-            <label for="send_name" class="form-label">보내는 분 성함</label>
+            <label for="send_name" class="form-label"><strong>보내는 분 성함</strong></label>
             <input type="text" class="form-control" name="send_name" id="send_name"
                    value="" required>
         </div>
         <div class="mb-3">
-            <label for="send_phone" class="form-label">보내는 분 연락처 (- 포함하여 입력해주세요 | ex: 010-xxxx-yyyy)</label>
+            <label for="send_phone" class="form-label"><strong>보내는 분 연락처 (- 포함하여 입력해주세요 | ex: 010-xxxx-yyyy)</strong></label>
             <input type="text" class="form-control" name="send_phone" id="send_phone"
                    value="{{ form.send_phone.value|default_if_none:'' }}" required>
         </div>
+
+
         <div class="mb-3">
-            <label for="send_addr" class="form-label">보내는 분 주소</label>
+            <label for="send_addr_zipcode" class="form-label"><strong>보내는 분 우편번호</strong></label>
             <div class="input-group">
-                <input type="text" class="form-control" name="send_addr" id="send_addr"
-                       value="{{ form.send_addr.value|default_if_none:'' }}" placeholder="주소를 입력하세요" required readonly>
-                <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode('send_addr')">주소 검색</button>
+                <input type="text" class="form-control" name="send_addr_zipcode" id="send_addr_zipcode" placeholder="우편번호" readonly required>
+                <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode('send_addr')"><strong>우편번호 찾기</strong></button>
             </div>
+        </div>
+        <div class="mb-3">
+            <label for="send_addr_road" class="form-label"><strong>보내는 분 도로명 주소</strong></label>
+            <input type="text" class="form-control" name="send_addr_road" id="send_addr_road" placeholder="도로명주소" readonly required>
+        </div>
+        <div class="mb-3">
+            <label for="send_addr_detail" class="form-label"><strong>보내는 분 상세 주소</strong></label>
+            <input type="text" class="form-control" name="send_addr_detail" id="send_addr_detail" placeholder="상세주소" required>
         </div>
 
         <!-- 구분선 -->
@@ -40,22 +49,31 @@
 
         <!-- 받는 분 정보 -->
         <div class="mb-3">
-            <label for="rec_name" class="form-label">받는 분 성함</label>
+            <label for="rec_name" class="form-label"><strong>받는 분 성함</strong></label>
             <input type="text" class="form-control" name="rec_name" id="rec_name"
                    value="{{ form.rec_name.value|default_if_none:'' }}" required>
         </div>
         <div class="mb-3">
-            <label for="rec_phone" class="form-label">받는 분 연락처 (- 포함하여 입력해주세요 | ex: 010-xxxx-yyyy)</label>
+            <label for="rec_phone" class="form-label"><strong>받는 분 연락처 (- 포함하여 입력해주세요 | ex: 010-xxxx-yyyy)</strong></label>
             <input type="text" class="form-control" name="rec_phone" id="rec_phone"
                    value="{{ form.rec_phone.value|default_if_none:'' }}" required>
         </div>
+
+        
         <div class="mb-3">
-            <label for="rec_addr" class="form-label">받는 분 주소</label>
+            <label for="rec_addr_zipcode" class="form-label"><strong>받는 분 우편번호</strong></label>
             <div class="input-group">
-                <input type="text" class="form-control" name="rec_addr" id="rec_addr"
-                       value="{{ form.rec_addr.value|default_if_none:'' }}" placeholder="주소를 입력하세요" required readonly>
-                <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode('rec_addr')">주소 검색</button>
+                <input type="text" class="form-control" name="rec_addr_zipcode" id="rec_addr_zipcode" placeholder="우편번호" readonly required>
+                <button type="button" class="btn btn-outline-secondary" onclick="execDaumPostcode('rec_addr')"><strong>우편번호 찾기</strong></button>
             </div>
+        </div>
+        <div class="mb-3">
+            <label for="rec_addr_road" class="form-label"><strong>받는 분 도로명 주소</strong></label>
+            <input type="text" class="form-control" name="rec_addr_road" id="rec_addr_road" placeholder="도로명주소" readonly required>
+        </div>
+        <div class="mb-3">
+            <label for="rec_addr_detail" class="form-label"><strong>받는 분 상세 주소</strong></label>
+            <input type="text" class="form-control" name="rec_addr_detail" id="rec_addr_detail" placeholder="상세주소" required>
         </div>
 
         <br>
@@ -64,14 +82,14 @@
 
         <!-- 상품 정보 -->
         <div class="mb-3">
-            <label for="product_type" class="form-label">상품 종류</label>
+            <label for="product_type" class="form-label"><strong>상품 종류</strong></label>
             <input type="text" class="form-control" name="product_type" id="product_type"
                    value="{{ form.product_type.value|default_if_none:'' }}" required>
         </div>
 
         <!-- 포장 형식 -->
         <div class="mb-3">
-            <label for="id_package_type" class="form-label">포장 형식</label>
+            <label for="id_package_type" class="form-label"><strong>포장 형식</strong></label>
             <select class="form-select mb-2" id="id_package_type" name="package_type" onchange="toggleCustomPackageInput(this)">
                 <option value="">-- 선택하세요 --</option>
                 <option value="naked" {% if form.package_type.value == "naked" %}selected{% endif %}>나체</option>
@@ -90,7 +108,7 @@
 
         <!-- 수량 -->
         <div class="mb-3">
-            <label for="id_num" class="form-label">수량</label>
+            <label for="id_num" class="form-label"><strong>수량</strong></label>
             <select class="form-select mb-2" id="id_num" name="num" onchange="toggleCustomNumInput(this)">
                 <option value="">-- 선택하세요 --</option>
                 <option value="1" {% if form.num.value == "1" %}selected{% endif %}>1</option>
@@ -108,6 +126,16 @@
                    value="{% if form.num.value not in '1 2 3 4 5' and form.num.value %}{{ form.num.value }}{% endif %}">
         </div>
 
+        <!-- 지불방식 -->
+        <div class="mb-3">
+            <label for="pay_method" class="form-label"><strong>지불방식</strong></label>
+            <select class="form-select mb-2" id="pay_method" name="pay_method" required>
+                <option value="">-- 선택하세요 --</option>
+                <option value="at_now" {% if form.pay_method.value == "at_now" %}selected{% endif %}>현불(선불)</option>
+                <option value="at_delivered" {% if form.pay_method.value == "at_delivered" %}selected{% endif %}>착불(후불)</option>
+            </select>
+        </div>
+
         <button type="submit" class="btn btn-primary">등록하기</button>
         <br><br><br><br><br>
     </form>
@@ -115,7 +143,9 @@
 
 {% endblock %}
 {% block script %}
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <script type="text/javascript">
+
 // 포장 형식 직접 입력
 function toggleCustomPackageInput(select) {
     const customInput = document.getElementById('custom_package_type');
@@ -140,6 +170,7 @@ function toggleCustomNumInput(select) {
         customInput.value = '';
     }
 }
+
 // 페이지 로드 시 직접입력 선택 상태 반영
 window.addEventListener('DOMContentLoaded', function() {
     toggleCustomPackageInput(document.getElementById('id_package_type'));
@@ -147,9 +178,17 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // 주소 자동완성(카카오/다음 API 연동용 예시 함수)
-function execDaumPostcode(targetId) {
-    // 실제 API 연동 코드를 여기에 작성하세요.
-    alert('주소 검색 API를 연동하세요. (예: 카카오 주소 API)');
-}
+function execDaumPostcode(prefix) {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 우편번호와 주소 정보를 해당 필드에 넣음
+                document.getElementById(prefix + '_zipcode').value = data.zonecode;
+                document.getElementById(prefix + '_road').value = data.roadAddress;
+                
+                // 상세주소 필드로 포커스를 이동
+                document.getElementById(prefix + '_detail').focus();
+            }
+        }).open();
+    }
 </script>
 {% endblock %}
