@@ -69,14 +69,23 @@
             <td class="text-start" style="background-color:#AFFFC8;">
             {% endif %}
 
-                {% if category == 'pre' %}
-                    <a href="{% url 'pybo:detail' 'pre' question.id %}">{{ question.subject }}</a>
+                {% if question.category == 'pre' %}
+                    {% if request.user == question.author or request.user.is_superuser %}
+                        <a href="{% url 'pybo:detail' 'pre' question.id %}">{{ question.subject }}</a>
+                    {% else %}
+                        <span>{{ question.subject }}</span>
+                    {% endif %}
                 {% elif category == 'find' %}
-                    <a href="{% url 'pybo:detail' 'find' question.id %}">{{ question.subject }}</a>
+                    {% if request.user == question.author or request.user.is_superuser %}
+                        <a href="{% url 'pybo:detail' 'find' question.id %}">{{ question.subject }}</a>
+                    {% else %}
+                        <span>{{ question.subject }}</span>
+                    {% endif %}
                 {% else %}
                     <a href="{% url 'pybo:detail' category question.id %}">{{ question.subject }}</a>
+
                     {% if question.answer_set.count > 0 %}
-                    <span class="text-danger small mx-2">{{ question.answer_set.count }}</span>
+                        <span class="text-danger small mx-2">{{ question.answer_set.count }}</span>
                     {% endif %}
                 {% endif %}
             </td>
