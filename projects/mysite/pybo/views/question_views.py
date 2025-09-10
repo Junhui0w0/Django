@@ -38,7 +38,7 @@ def category_question_create(request, category): #질문등록
                     custom_num = request.POST.get('custom_num')
                     # print(custom_num)
                     question.num = custom_num
-
+                    
                 question.save()
                 return redirect('pybo:board', category=category)
             
