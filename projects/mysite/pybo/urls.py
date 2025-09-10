@@ -38,6 +38,9 @@ urlpatterns = [
     #카테고리별 답변 삭제
     path('answer/delete/<int:answer_id>/', answer_views.category_answer_delete, name='category_answer_delete'),
 
+    #카테고리(pre/find) 정보 추출
+    path('board/<str:category>/extract/', base_views.extract_excel, name='extract_excel'),
+
     #===============================================
 
     #카테고리별 게시글 추천
