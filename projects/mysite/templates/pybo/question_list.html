@@ -1,30 +1,30 @@
 {% extends 'base.html' %}
 {% load pybo_filter %}
 {% block content %}
-
 <div class="container my-3">
     <h2>
         {% if category == 'pre' %}
         택배 사전 접수
-
         {% elif category == 'find' %}
         택배 찾기
-
         {% elif category == 'qna' %}
         문의하기
-        
         {% elif category == 'notice' %}
         공지사항
-        
         {% endif %}
     </h2>
-
     <div class="row my-3">
         <div class="col-6">
             {% if category != 'notice' or request.user.is_superuser %}
             <a href="{% url 'pybo:category_question_create' category %}" class="btn btn-primary">등록하기</a>
+
+            {% if request.user.is_superuser and category in 'pre find' %}
+            <button class="btn btn-success" id="btn_extract">데이터 추출(excel)</button>
+            {% endif %}
+
             {% endif %}
         </div>
+
         <div class="col-6">
             <div class="input-group">
                 <input type="text" id="search_kw" class="form-control" value="{{ kw|default_if_none:'' }}">
@@ -34,10 +34,14 @@
             </div>
         </div>
     </div>
-
     <table class="table">
         <thead>
         <tr class="text-center table-dark">
+            {% if category in 'find pre' and request.user.is_superuser %}
+            <th style="width:5%">
+                <input type="checkbox" id="select_all">
+            </th>
+            {% endif %}
             <th>번호</th>
             <th style="width:50%">제목</th>
             <th>글쓴이</th>
@@ -49,6 +53,12 @@
         {% for question in question_list %}
         <tr class="text-center">
 
+            {% if category in 'find pre' and request.user.is_superuser %}
+            <td>
+                <input type="checkbox" name="selected_questions" value="{{ question.id }}">
+            </td>
+            {% endif %}
+
             {% if question.category == 'notice' %}
             <td>
             {% elif question.processed == False %}
@@ -56,11 +66,8 @@
             {% else %}
             <td style="background-color:#AFFFC8;">
             {% endif %}
-            
-                <!-- 번호 = 전체건수 - 시작인덱스 - 현재인덱스 + 1 -->
                 {{ question_list.paginator.count|sub:question_list.start_index|sub:forloop.counter0|add:1 }}
             </td>
-
             {% if question.category == 'notice' %}
             <td class="text-start">
             {% elif question.processed == False %}
@@ -68,7 +75,6 @@
             {% else %}
             <td class="text-start" style="background-color:#AFFFC8;">
             {% endif %}
-
                 {% if question.category == 'pre' %}
                     {% if request.user == question.author or request.user.is_superuser %}
                         <a href="{% url 'pybo:detail' 'pre' question.id %}">{{ question.subject }}</a>
@@ -83,21 +89,18 @@
                     {% endif %}
                 {% else %}
                     <a href="{% url 'pybo:detail' category question.id %}">{{ question.subject }}</a>
-
                     {% if question.answer_set.count > 0 %}
                         <span class="text-danger small mx-2">{{ question.answer_set.count }}</span>
                     {% endif %}
                 {% endif %}
             </td>
-
             {% if question.category == 'notice' %}
             <td>{{ question.author.username }}</td>
             {% elif question.processed == False %}
-            <td style="background-color:#FFC6C1;">{{ question.author.username }}</td>  <!-- 글쓴이 추가 -->
+            <td style="background-color:#FFC6C1;">{{ question.author.username }}</td>
             {% else %}
             <td style="background-color:#AFFFC8;">{{ question.author.username }}</td>
             {% endif %}
-
             {% if question.category == 'notice' %}
             <td>{{ question.create_date }}</td>
             {% elif question.processed == False %}
@@ -109,71 +112,55 @@
         {% endfor %}
         {% else %}
         <tr>
-            <td colspan="4">질문이 없습니다.</td>
+            <td colspan="5">질문이 없습니다.</td>
         </tr>
         {% endif %}
         </tbody>
     </table>
-
-
-    <!-- 페이징처리 시작 -->
     <ul class="pagination justify-content-center">
-
         {% if question_list.has_previous %}
         <li class="page-item">
-            <a class="page-link" href="?page=1">처음으로</a>
+            <a class="page-link" href="?page=1&kw={{ kw }}">처음으로</a>
         </li>
         {% else %}
         <li class="page-item disabled">
             <a class="page-link" tabindex="-1" aria-disabled="true" href="#">처음으로</a>
         </li>
         {% endif %}
-
-        <!-- 이전페이지 -->
         {% if question_list.has_previous %}
         <li class="page-item">
-                    <a class="page-link" data-page="{{ question_list.previous_page_number }}"
-           href="javascript:void(0)">이전</a>
+            <a class="page-link" href="?page={{ question_list.previous_page_number }}&kw={{ kw }}">이전</a>
         </li>
         {% else %}
         <li class="page-item disabled">
             <a class="page-link" tabindex="-1" aria-disabled="true" href="#">이전</a>
         </li>
         {% endif %}
-
-        <!-- 페이지리스트 -->
         {% for page_number in question_list.paginator.page_range %}
         {% if page_number >= question_list.number|add:-3 and page_number <= question_list.number|add:3 %}
         {% if page_number == question_list.number %}
         <li class="page-item active" aria-current="page">
-            <a class="page-link" data-page="{{ page_number }}"
-           href="javascript:void(0)">{{ page_number }}</a>
+            <a class="page-link" href="?page={{ page_number }}&kw={{ kw }}">{{ page_number }}</a>
         </li>
         {% else %}
         <li class="page-item">
-            <a class="page-link" data-page="{{ page_number }}"
-           href="javascript:void(0)">{{ page_number }}</a>
+            <a class="page-link" href="?page={{ page_number }}&kw={{ kw }}">{{ page_number }}</a>
         </li>
         {% endif %}
         {% endif %}
         {% endfor %}
-
-        <!-- 다음페이지 -->
         {% if question_list.has_next %}
         <li class="page-item">
-            <a class="page-link" data-page="{{ question_list.next_page_number }}"
-           href="javascript:void(0)">다음</a>
+            <a class="page-link" href="?page={{ question_list.next_page_number }}&kw={{ kw }}">다음</a>
         </li>
         {% else %}
         <li class="page-item disabled">
             <a class="page-link" tabindex="-1" aria-disabled="true" href="#">다음</a>
         </li>
         {% endif %}
-
-        <!-- 마지막으로 버튼-->
         {% if question_list.has_next %}
         <li class="page-item">
-            <a class="page-link" href="?page={{ question_list.paginator.count }}">마지막으로</a>
+            <a class="page-link" href="?page={{ question_list.paginator.num_pages }}&kw={{ kw }}">마지막으로</a>
         </li>
         {% else %}
         <li class="page-item disabled">
@@ -181,8 +168,6 @@
         </li>
         {% endif %}
     </ul>
-    <!-- 페이징처리 끝 -->
-
 </div>
 <form id="searchForm" method="get" action="{% url 'pybo:board' category %}">
     <input type="hidden" id="kw" name="kw" value="{{ kw|default_if_none:'' }}">
@@ -191,18 +176,120 @@
 {% endblock %}
 {% block script %}
 <script type='text/javascript'>
+// 기존 검색 및 페이지 이동 기능
 const page_elements = document.getElementsByClassName("page-link");
 Array.from(page_elements).forEach(function(element) {
     element.addEventListener('click', function() {
-        document.getElementById('page').value = this.dataset.page;
-        document.getElementById('searchForm').submit();
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('page', this.dataset.page);
+        window.location.href = window.location.pathname + '?' + urlParams.toString();
     });
 });
 const btn_search = document.getElementById("btn_search");
 btn_search.addEventListener('click', function() {
-    document.getElementById('kw').value = document.getElementById('search_kw').value;
-    document.getElementById('page').value = 1;  // 검색버튼을 클릭할 경우 1페이지부터 조회한다.
-    document.getElementById('searchForm').submit();
+    const kw = document.getElementById('search_kw').value;
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('kw', kw);
+    urlParams.set('page', 1);
+    window.location.href = window.location.pathname + '?' + urlParams.toString();
 });
+
+// 추출 버튼 클릭 시 선택된 ID들을 URL에 담아 이동
+const btn_extract = document.getElementById('btn_extract');
+const questionCheckboxes = document.querySelectorAll('input[name="selected_questions"]');
+if (btn_extract) {
+    btn_extract.addEventListener('click', function() {
+        const selectedIds = getSelectedIds();
+        if (selectedIds.length === 0) {
+            alert("추출할 게시글을 하나 이상 선택해주세요.");
+            return;
+        }
+        const category = "{{ category }}";
+        const url = `/pybo/board/${category}/extract/?ids=${selectedIds.join(',')}`;
+        window.location.href = url;
+    });
+}
+
+// ----------------------------------------------------
+// 변경 및 추가된 코드
+// ----------------------------------------------------
+
+// 선택된 ID를 Session Storage에 저장하고 불러오는 함수
+function getSelectedIds() {
+    try {
+        const ids = JSON.parse(sessionStorage.getItem('selected_questions')) || [];
+        return ids;
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveSelectedIds(ids) {
+    sessionStorage.setItem('selected_questions', JSON.stringify(ids));
+}
+
+// 모든 체크박스의 상태를 업데이트하고 저장하는 함수
+function updateCheckboxState(checkbox, isChecked) {
+    const row = checkbox.closest('tr');
+    const selectedIds = getSelectedIds();
+    const id = checkbox.value;
+
+    if (isChecked) {
+        if (!selectedIds.includes(id)) {
+            selectedIds.push(id);
+        }
+        row.style.backgroundColor = '#d3d3d3';
+    } else {
+        const index = selectedIds.indexOf(id);
+        if (index > -1) {
+            selectedIds.splice(index, 1);
+        }
+        row.style.backgroundColor = '';
+    }
+    saveSelectedIds(selectedIds);
+}
+
+// 페이지 로드 시 이전에 선택했던 체크박스들을 복원
+window.addEventListener('load', function() {
+    const selectedIds = getSelectedIds();
+    questionCheckboxes.forEach(checkbox => {
+        if (selectedIds.includes(checkbox.value)) {
+            checkbox.checked = true;
+            checkbox.closest('tr').style.backgroundColor = '#d3d3d3';
+        }
+    });
+
+    // 개별 체크박스 상태에 따라 '모두 선택' 체크박스 상태 업데이트
+    const selectAllCheckbox = document.getElementById('select_all');
+    if (selectAllCheckbox) {
+        const allCheckedOnPage = Array.from(questionCheckboxes).every(cb => cb.checked);
+        selectAllCheckbox.checked = allCheckedOnPage;
+    }
+});
+
+// 개별 체크박스 클릭 이벤트 리스너
+questionCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        updateCheckboxState(this, this.checked);
+
+        const allChecked = Array.from(questionCheckboxes).every(cb => cb.checked);
+        const selectAllCheckbox = document.getElementById('select_all');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = allChecked;
+        }
+    });
+});
+
+// '모두 선택' 체크박스 기능
+const selectAllCheckbox = document.getElementById('select_all');
+if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener('change', function() {
+        const isChecked = this.checked;
+        questionCheckboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+            updateCheckboxState(checkbox, isChecked);
+        });
+    });
+}
 </script>
 {% endblock %}
