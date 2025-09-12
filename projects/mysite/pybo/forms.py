@@ -66,6 +66,7 @@ class Find_QuestionForm(forms.ModelForm):
             'subject': '제목',
             'send_name': '보내는 분 성함',
             'send_phone': '보내는 분 연락처',
+            
             'send_addr_zipcode': '보내는 분 우편주소',
             'send_addr_road': '보내는 분 도로명 주소',
             'send_addr_detail': '보내는 분 상세 주소',
