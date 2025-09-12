@@ -3,8 +3,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from ..models import Question, Answer, Pre_Question, Find_Question
 from ..forms import QuestionForm, AnswerForm
+
 from openpyxl import Workbook
 import datetime
+from urllib.parse import quote
 
 from django.core.paginator import Paginator #- 한 페이지에 여러 개의 결과를 보여주는 것 방지
 from django.contrib.auth.decorators import login_required
@@ -94,7 +96,6 @@ def detail(request, category, question_id): #게시글 상세
     context = {'question': question, 'category': category}
     return render(request, template, context)
 
-@login_required(login_url='common:login')
 def extract_excel(request, category):
     # 1. 관리자(superuser) 권한 확인
     if not request.user.is_superuser:
@@ -108,8 +109,13 @@ def extract_excel(request, category):
     selected_ids = ids_string.split(',')
     
     # 3. 데이터베이스에서 해당 게시글 데이터 가져오기
-    # 여기서는 Pre_Question 모델을 사용한다고 가정합니다.
-    questions = Pre_Question.objects.filter(id__in=selected_ids)
+    if category == 'pre':
+        questions = Pre_Question.objects.filter(id__in=selected_ids)
+    elif category == 'find':
+        questions = Find_Question.objects.filter(id__in=selected_ids)
+    else:
+        print(f'base_views #error - extract_excel - category 분류 실패')
+        return HttpResponse("유효하지 않은 카테고리입니다.", status=400) # Better to return a proper HttpResponse
 
     # 4. Excel 파일 생성 및 데이터 작성
     wb = Workbook()
@@ -124,66 +130,89 @@ def extract_excel(request, category):
     elif category == 'find':
         ws.title = "택배찾기"
         headers = ['보내는 분 성함', '보내는 분 연락처', '보내는 분 우편번호', '보내는 분 도로명 주소', '보내는 분 상세 주소',
-                   '받는 분 성함', '받는 분 연락처', '받는 분 우편번호', '받는 분 도로명 주소', '받는 분 상세 주소',
-                   '상품 종류', '포장 형식', '수량', '지불 방식']
+                   '상품 종류', '포장 형식', '수량']
     else:
         return HttpResponse("유효하지 않은 카테고리입니다.", status=400)
 
     ws.append(headers)
 
     # 데이터 추출 및 행에 추가
-    for q in questions:
-        row = [
-            q.send_name, q.send_phone, q.send_addr_zipcode, q.send_addr_road, q.send_addr_detail,
-            q.rec_name, q.rec_phone, q.rec_addr_zipcode, q.rec_addr_road, q.rec_addr_detail,
-            q.product_type, q.num
-        ]
+    rows = []
+    if category == 'pre':
+        for q in questions:
+            row = [
+                q.send_name, q.send_phone, q.send_addr_zipcode, q.send_addr_road, q.send_addr_detail,
+                q.rec_name, q.rec_phone, q.rec_addr_zipcode, q.rec_addr_road, q.rec_addr_detail,
+                q.product_type, q.num
+            ]
 
-        if hasattr(q, 'package_type'):
-            if q.package_type == 'vinyl':
-                str_package_type = '비닐'
+            # 포장 형식 변환 및 추가
+            str_package_type = q.package_type if q.package_type else '정보 없음'
+            if str_package_type == 'vinyl': str_package_type = '비닐'
+            elif str_package_type == 'naked': str_package_type = '나체'
+            elif str_package_type == 'box': str_package_type = '박스'
+            elif str_package_type == 'custom': str_package_type = '포장-custom'
+            row.append(str_package_type)
 
-            elif q.package_type == 'naked':
-                str_package_type = '나체'
-
-            elif q.package_type == 'box':
-                str_package_type = '박스'
-
-            elif q.package_type == 'custom':
-                str_package_type = '포장-custom'
-
-            else:
-                str_package_type = 'else-포장-error'
-
-        else:
-            str_package_type = '포장-error'
-
-        row.append(str_package_type)    
-
-        # 지불 방식 필드는 'pay_method'로 가정하고 추가
-        if hasattr(q, 'pay_method'):
-            if q.pay_method == 'at_now':
-                str_pay_method = '현불'
-
-            elif q.pay_method == 'at_delivered':
-                str_pay_method = '착불'
-
-            else:
-                str_pay_method = 'else-정보 없음'
-    
+            # 지불 방식 변환 및 추가
+            str_pay_method = q.pay_method if hasattr(q, 'pay_method') and q.pay_method else '정보 없음'
+            if str_pay_method == 'at_now': str_pay_method = '현불'
+            elif str_pay_method == 'at_delivered': str_pay_method = '착불'
             row.append(str_pay_method)
-        else:
-            row.append("정보 없음") # pay_method가 없는 모델인 경우
+            
+            rows.append(row)
 
-        
-        ws.append(row)
+    elif category == 'find':
+        for q in questions:
+            row = [
+                q.send_name, q.send_phone, q.send_addr_zipcode, q.send_addr_road, q.send_addr_detail,
+                q.product_type, q.num
+            ]
+            
+            # 포장 형식 변환 및 추가
+            str_package_type = q.package_type if hasattr(q, 'package_type') and q.package_type else '정보 없음'
+            if str_package_type == 'vinyl': str_package_type = '비닐'
+            elif str_package_type == 'naked': str_package_type = '나체'
+            elif str_package_type == 'box': str_package_type = '박스'
+            elif str_package_type == 'custom': str_package_type = '포장-custom'
+            row.append(str_package_type)
+            
+            rows.append(row)
+            
+    for row_data in rows:
+        ws.append(row_data)
 
-    # 5. HTTP 응답 생성 및 파일 다운로드
+    # 5. Excel 컬럼 너비 자동 조정 (Fix #2)
+    idx = 0
+    for col in ws.columns:
+        print(f'{idx}번쨰 col 데이터: {col}')
+        idx += 1
+
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+                    print(f'idx: {idx} // max_len: {max_length} // string:{cell.value}')
+            except:
+                pass
+
+        if max_length <= 4:
+            max_length = 6
+
+        adjusted_width = (max_length * 1.7)
+        ws.column_dimensions[column].width = adjusted_width
+
+    # 6. HTTP 응답 생성 및 파일 다운로드 (Fix #1)
     now = datetime.datetime.now().strftime('%Y%m%d')
     file_name = f"{now}_{ws.title}.xlsx"
     
+    # URL 인코딩을 적용하여 파일명에 한글이 포함되어도 깨지지 않게 함
+    encoded_file_name = quote(file_name) 
+
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+    response['Content-Disposition'] = f"attachment; filename*=UTF-8''{encoded_file_name}"
     
     # 워크북을 HTTP 응답으로 저장하고 반환
     wb.save(response)
