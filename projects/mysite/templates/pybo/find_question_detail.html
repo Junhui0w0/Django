@@ -7,10 +7,12 @@
             <div class="card-text">
                 <p><strong>보내는 분:</strong> {{ question.send_name }}</p>
                 <p><strong>보내는 분 TEL:</strong> {{ question.send_phone }}</p>
+                <br>
+                <p><strong>보내는 분 우편변호:</strong> {{ question.send_addr_zipcode }}</p>
+                <p><strong>보내는 분 도로명 주소:</strong> {{ question.send_addr_road }}</p>
+                <p><strong>보내는 분 상세 주소:</strong> {{ question.send_addr_detail }}</p>
 
-                {% if question.send_addr %}
-                <p><strong>보내는 주소:</strong> {{ question.send_addr }}</p>
-                {% endif %}
+                <br><hr><br>
                 
                 <p><strong>상품 종류:</strong> {{ question.product_type }}</p>
                 
@@ -58,13 +60,13 @@
         <!-- 삭제 -->
         {% if request.user == question.author or request.user.is_superuser %}
         <a href="javascript:void(0)" class="delete btn btn-sm btn-outline-secondary"
-        data-uri="{% url 'pybo:category_question_delete' category question.id %}">삭제</a>
+        data-uri="{% url 'pybo:category_question_delete' category question.id %}" style="background-color:#FFC6C1;">삭제</a>
         {% endif %}
 
         <!-- 처리완료 -->
         {% if request.user.is_superuser %}
         <a href="javascript:void(0)" class="processed btn btn-sm btn-outline-secondary"
-        data-uri="{% url 'pybo:category_question_processed' category question.id %}">처리완료</a>
+        data-uri="{% url 'pybo:category_question_processed' category question.id %}" style="background-color:#AFFFC8;">처리완료</a>
         {% endif %}
 
 
