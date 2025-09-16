@@ -30,3 +30,5 @@ urlpatterns = [
     path('pybo/', include('pybo.urls')), #-> .../pybo/ETC & .../pybo/ETC2 등 pybo로 시작하는 url을 추가할 때 pybo.urls만 수정하면 됨
     path('common/', include('common.urls')), #common앱 추가
 ]
+
+handler404 = 'common.views.page_not_found'
