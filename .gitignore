@@ -200,6 +200,7 @@ $RECYCLE.BIN/
 *.lnk
 api*.txt
 
+logs
 test.py
 
 
