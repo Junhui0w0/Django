@@ -47,4 +47,13 @@
 
 ## 2025-09-15 ##
 1. robots.txt 추가
+    1. 크롤링 방지 -> 자원 소모 방지
 
+## 2025-09-16 ##
+1. 서버 배포 완료
+    1. 사용 Tool 
+        - AWS Light Sale
+        - Nginx
+        - Gunicorn
+    2. 운영기간: 2025.09.16 ~ 2025.12.10
+    3. Link: pajudaesin.quest
