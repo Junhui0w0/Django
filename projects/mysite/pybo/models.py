@@ -42,6 +42,10 @@ class Pre_Question(models.Model): #택배 사전 접수
     def __str__(self):
         return self.subject
 
+
+
+
+
 class Find_Question(models.Model):
     processed = models.BooleanField(default=False)
 
@@ -64,6 +68,12 @@ class Find_Question(models.Model):
 
     def __str__(self):
         return self.subject
+
+
+
+
+
+
 
 class Question(models.Model): #공지 / 질문
     processed = models.BooleanField(default=False)

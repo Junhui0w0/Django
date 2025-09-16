@@ -1,3 +1,8 @@
+-프로젝트 시작
+    django-admin startproject config . (현재 디렉터리에 projectstart -> config 폴더(메인인듯<이름바꾸면 해당 폴더가 main인듯>))
+    settings.py -> LANGUAGE_CODE = 'ko-kr' -> TIME_ZONE = 'Asia/Seoul'
+    앱 시작: django-admin startapp 앱이름
+
 - Project = 큰 틀
 - App = 틀 안에 있는 기능
 

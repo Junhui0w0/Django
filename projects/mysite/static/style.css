@@ -1,0 +1,18 @@
+/* Navbar */
+.navbar {
+    background-color: #4CAF50 !important; /* Green */
+}
+
+.navbar-brand, .nav-link {
+    color: white !important;
+}
+
+.nav-link:hover {
+    color: #FFEB3B !important; /* Yellow */
+}
+
+/* Active link */
+.nav-item.active .nav-link {
+    color: #f44336 !important; /* Red */
+    font-weight: bold;
+}

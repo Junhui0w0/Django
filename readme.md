@@ -44,3 +44,7 @@
 1. 택배 찾기(find) 수정
     - 상세 페이지(detail): 주소 정보 누락 수정(zipcode, road, detail)
     - 데이터 추출(excel_extract): 데이터 추출 수정
+
+## 2025-09-15 ##
+1. robots.txt 추가
+
