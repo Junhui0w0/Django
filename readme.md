@@ -56,4 +56,4 @@
         - Nginx
         - Gunicorn
     2. 운영기간: 2025.09.16 ~ 2025.12.10
-    3. Link: pajudaesin.quest
+    3. Link: <https://pajudaesin.quest/>
