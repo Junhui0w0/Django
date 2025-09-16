@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseForbidden, HttpResponse
 # from django.http import HttpResponseNotAllowed
 from django.utils import timezone
 from ..models import Question, Answer, Pre_Question, Find_Question
@@ -95,11 +96,43 @@ def category_question_create(request, category): #질문등록
 
 
     #카테고리=notice or qna -> QuestionForm 사용
-    elif category in ['notice', 'qna']:
-        if category == 'notice':
-            category_name = '공지사항'
-        elif category == 'qna':
-            category_name = '문의하기'
+    elif category == 'qna':
+        category_name = '문의하기'
+
+        today = timezone.now().strftime('%Y-%m-%d')
+        username = request.user.username if request.user.is_authenticated else ''
+
+        form = QuestionForm()
+        
+        if request.method == 'POST':
+            form = QuestionForm(request.POST)
+
+            if form.is_valid(): #유효성 검사
+                question = form.save(commit=False) #commit=False -> 임시저장
+                # question.subject = f'{category_name} | {today} | {username}'
+                question.create_date = timezone.now()
+                question.category = category
+                question.author = request.user
+                question.save()
+                return redirect('pybo:board', category=category)
+            
+            
+        else:
+            # initial_subject = f'{category_name} | {today} | {username}'
+
+            form = QuestionForm()
+
+        context = {'form': form, 'category': category}
+        return render(request, 'pybo/question_form.html', context)
+    
+
+
+    elif category =='notice':
+        if not request.user.is_superuser:
+            return HttpResponse("접근 권한이 없습니다.", status=403)
+        
+        category_name = '공지사항'
+        print('notice')
 
         today = timezone.now().strftime('%Y-%m-%d')
         username = request.user.username if request.user.is_authenticated else ''
